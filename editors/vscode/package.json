@@ -2,7 +2,7 @@
   "name": "ruffgrid",
   "displayName": "ruffgrid",
   "description": "Ruff for .py files and Jupyter notebooks, with grids: brackets packed several items to a line stay packed. Replaces the Ruff extension.",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "publisher": "rgsk",
   "private": true,
   "license": "MIT",
@@ -19,6 +19,16 @@
     "onNotebook:jupyter-notebook"
   ],
   "contributes": {
+    "commands": [
+      {
+        "command": "ruffgrid.notebook.fixAll",
+        "title": "ruffgrid: Fix All in Notebook"
+      },
+      {
+        "command": "ruffgrid.notebook.organizeImports",
+        "title": "ruffgrid: Organize Imports in Notebook"
+      }
+    ],
     "configuration": {
       "title": "ruffgrid",
       "properties": {

@@ -224,11 +224,12 @@ class Proxy:
         try:
             new = fix_py(old, uri_to_path(uri), self.ruff, ORGANIZE if kind == ORGANIZE_IMPORTS else None)
         except FormatError:
-            return []  # mid-edit code: offer nothing rather than fail the save
-        if new == old:
-            return []
+            new = old  # mid-edit code: change nothing rather than fail the save
         title = "Ruff: Organize imports" if kind == ORGANIZE_IMPORTS else "Ruff: Fix all auto-fixable problems"
-        return [{"title": title, "kind": kind + ".ruff", "edit": {"changes": whole(uri, old, new)}}]
+        # offered with nothing to fix too (an empty edit), as by the Ruff extension: a keybinding running
+        # `editor.action.codeAction` with apply: first then does nothing, not "No code actions available"
+        changes = whole(uri, old, new) if new != old else {}
+        return [{"title": title, "kind": kind + ".ruff", "edit": {"changes": changes}}]
 
     def notebook_action(self, nb: str, kind: str) -> list[dict]:
         """A whole-notebook action, as one edit over its code cells."""
@@ -275,7 +276,12 @@ class Proxy:
         threading.Thread(target=self.pump_server, daemon=True).start()
         stdin = sys.stdin.buffer
         while (msg := read_message(stdin)) is not None:
-            self.on_client(msg)
+            try:
+                self.on_client(msg)
+            except Exception as e:  # noqa: BLE001  # one bad message mustn't take the server down
+                print(f"ruffgrid: {msg.get('method')}: {e!r}", file=sys.stderr)
+                if "id" in msg and "method" in msg:
+                    self.client.send({"jsonrpc": "2.0", "id": msg["id"], "error": {"code": -32603, "message": str(e)}})
         self.proc.terminate()
 
 

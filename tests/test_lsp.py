@@ -120,6 +120,12 @@ def test_fix_all_and_organize_imports(client, tmp_path):
     assert fix["edit"]["changes"][uri][0]["newText"] == "import os\n\nprint(os)\n"
     (org,) = ask("source.organizeImports.ruff")
     assert org["edit"]["changes"][uri][0]["newText"] == "import os\nimport sys\n\nprint(os)\n"
+    client.notify(
+        "textDocument/didChange",
+        {"textDocument": {"uri": uri, "version": 2}, "contentChanges": [{"text": "import os\n\nprint(os)\n"}]},
+    )
+    (nothing,) = ask("source.fixAll.ruff")  # nothing to fix: still offered, changing nothing
+    assert nothing["edit"] == {"changes": {}}
 
 
 def test_diagnostics_come_from_ruff(client, tmp_path):
@@ -172,3 +178,13 @@ def test_notebook_actions_run_from_the_first_code_cell_after_markdown(client, tm
     (fmt,) = ask("notebook.format.ruff")
     assert fmt["edit"]["changes"][b][0]["newText"] == "x = [\n    1, 2,\n    3,\n]\nprint(os)"
     assert ask("source.fixAll") == []  # a cell alone: the notebook-wide action does it
+
+
+def test_a_bad_message_gets_an_error_not_a_crash(client, tmp_path):
+    uri = open_py(client, tmp_path / "a.py", "import os\n")
+    client.next_id += 1
+    client.send({"id": client.next_id, "method": "textDocument/codeAction", "params": [{"textDocument": {"uri": uri}}]})
+    while (msg := client.inbox.get(timeout=20)).get("id") != client.next_id:
+        pass
+    assert "error" in msg
+    assert client.request("textDocument/formatting", {"textDocument": {"uri": uri}, "options": {}}) == []

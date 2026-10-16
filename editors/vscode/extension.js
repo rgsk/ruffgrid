@@ -59,19 +59,35 @@ async function notebookAction(document, range, context, token) {
   const cell = nb?.getCells().find((c) => c.kind === vscode.NotebookCellKind.Code && c.document.languageId === "python");
   if (!cell) return [];
   const zero = { line: 0, character: 0 };
-  const result = await client.sendRequest(
-    "textDocument/codeAction",
-    {
-      textDocument: { uri: client.code2ProtocolConverter.asUri(cell.document.uri) },
-      range: { start: zero, end: zero },
-      context: { diagnostics: [], only: [kind.value], triggerKind: 2 },
-    },
-    token
-  );
+  const params = {
+    textDocument: { uri: client.code2ProtocolConverter.asUri(cell.document.uri) },
+    range: { start: zero, end: zero },
+    context: { diagnostics: [], only: [kind.value], triggerKind: 2 },
+  };
+  // no token (a command): sendRequest(method, params, undefined) would send [params, undefined]
+  const result = await (token
+    ? client.sendRequest("textDocument/codeAction", params, token)
+    : client.sendRequest("textDocument/codeAction", params));
   return client.protocol2CodeConverter.asCodeActionResult(result || [], token);
 }
 
+// ruffgrid.notebook.fixAll / organizeImports: the same notebook-wide actions as on save, on the active
+// notebook now (for a keybinding)
+async function runNotebookAction(kind) {
+  const cell = vscode.window.activeNotebookEditor?.notebook
+    .getCells()
+    .find((c) => c.kind === vscode.NotebookCellKind.Code && c.document.languageId === "python");
+  if (!cell) return;
+  const actions = await notebookAction(cell.document, undefined, { only: kind }, undefined);
+  for (const a of actions) if (a.edit) await vscode.workspace.applyEdit(a.edit);
+}
+
 exports.activate = async (context) => {
+  const [, fixAll, organize] = NOTEBOOK_KINDS;
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ruffgrid.notebook.fixAll", () => runNotebookAction(fixAll)),
+    vscode.commands.registerCommand("ruffgrid.notebook.organizeImports", () => runNotebookAction(organize))
+  );
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider(
       { notebookType: "jupyter-notebook" },
