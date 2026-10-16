@@ -9,14 +9,17 @@
 #    Ruff alone: one number per line.
 primes = [
     11, 13, 17,
-    19, 23, 29, 31, 37, 41, 43,
-    47,
+    19, 23, 29,
+    31, 37, 41,
+    43, 47,
 ]
 
 
 # 2. The first line can start right after the bracket: it moves onto a line of its own.
-dirs = [(0, 1), (0, -1),
-        (1, 0), (-1, 0),]
+dirs = [
+    (0, 1), (0, -1),
+    (1, 0), (-1, 0),
+]
 
 
 # 3. Width, not count: `10, 20, 30` is 10 wide, so a wider item gets a line to itself.
@@ -26,7 +29,8 @@ def bfs(n, m, k, start, blocked):
 
 result = bfs(
     10, 20, 30,
-    start=(0, 0), blocked={(1, 1), (2, 2)},
+    start=(0, 0),
+    blocked={(1, 1), (2, 2)},
 )
 
 
@@ -34,32 +38,35 @@ result = bfs(
 board = {
     "empty": [
         0, 0, 0,
-        0, 0, 0, 0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
     ],
-    "cross": [1, 0, 1,
-              0, 1, 0, 1, 0, 1,],
+    "cross": [
+        1, 0, 1,
+        0, 1, 0,
+        1, 0, 1,
+    ],
 }
 
 
 # 5. The width is measured after Ruff spaces the first line, so `10,20,30` counts as `10, 20, 30`.
 tens = [
-    10,20,30,
-    40,50,60,70,80,90,
+    10, 20, 30,
+    40, 50, 60,
+    70, 80, 90,
 ]
 
 
 # 6. One item on the first line: Ruff's layout, one per line.
 names = [
     "ada",
-    "grace", "linus",
+    "grace",
+    "linus",
 ]
 
 
 # 7. No trailing comma after the last item: Ruff's layout again, here joined onto one line.
-short = [
-    1, 2, 3,
-    4
-]
+short = [1, 2, 3, 4]
 
 
 # 8. Ruff's `# fmt: off` / `# fmt: on` (and `# fmt: skip`) still apply.
