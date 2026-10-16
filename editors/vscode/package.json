@@ -1,0 +1,39 @@
+{
+  "name": "ruffgrid",
+  "displayName": "ruffgrid",
+  "description": "Ruff for .py files and Jupyter notebooks, with grids: brackets packed several items to a line stay packed. Replaces the Ruff extension.",
+  "version": "0.1.1",
+  "publisher": "rgsk",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Formatters",
+    "Linters"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:python",
+    "onNotebook:jupyter-notebook"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "ruffgrid",
+      "properties": {
+        "ruffgrid.serverCommand": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Command that starts the server, e.g. [\"uv\", \"run\", \"ruffgrid\"]. Default: <workspace>/.venv/bin/ruffgrid, else ruffgrid from PATH."
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  // ruffgrid instead of the Ruff extension here (disable byname's extension in this workspace too:
+  // it also serves .py files)
+  "ruff.enable": false,
+  "ruff.lint.enable": false, // read by ruffgrid too: no Ruff warnings in the editor
+  "[python]": {
+    "editor.defaultFormatter": "rgsk.ruffgrid",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "notebook.formatOnSave.enabled": true,
+  "notebook.codeActionsOnSave": {
+    "notebook.source.fixAll": "explicit",
+    "notebook.source.organizeImports": "explicit"
+  }
+}
